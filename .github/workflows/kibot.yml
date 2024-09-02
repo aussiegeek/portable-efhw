@@ -1,0 +1,30 @@
+name: Kibot
+
+permissions:
+  contents: write
+
+on:
+  - push
+
+jobs:
+  kibot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: INTI-CMNB/KiBot@v2_k8
+        with:
+          config: config.kibot.yaml
+          # optional - prefix to output defined in config
+          dir: output
+
+      - name: upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: output
+          path: output
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          fail_on_unmatched_files: true
+          files: output/**/*

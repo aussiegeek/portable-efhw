@@ -1,0 +1,78 @@
+kibot:
+  version: 1
+
+import:
+  - file: JLCPCB
+
+preflight:
+  # check_zone_fills: true
+  erc: true
+  drc: true
+  set_text_variables:
+    - name: version
+      command: 'echo "${GITHUB_REF_NAME:=snapshot}"'
+    - name: "date"
+      command: 'if [ -z ${GITHUB_SHA+x} ]; then echo "2000-01-01"; else date --iso-8601; fi'
+    - name: "git_hash"
+      command: 'echo "${GITHUB_SHA:=snapshot}"'
+      before: "Git:"
+
+outputs:
+  - name: ibom
+    comment: "Prototype mounting guide"
+    type: ibom
+    dir: BoM
+
+  - name: "print_sch"
+    comment: "Schematic PDF"
+    type: pdf_sch_print
+    dir: Schematic
+
+  - name: costs_bom_xlsx
+    comment: Costs Bill of Materials in XLSX format
+    type: bom
+    dir: BoM/Costs
+    options:
+      format: XLSX
+      group_fields:
+        - part
+        - part lib
+        - value
+        - footprint
+        - footprint lib
+        - voltage
+        - tolerance
+        - current
+        - power
+        - mouser#
+      count_smd_tht: true
+      xlsx:
+        style: modern-green
+        kicost: true
+        specs: true
+      pre_transform: _kicost_rename
+  - name: generic_bom_html
+    comment: Generic Bill of Materials in HTML format
+    type: bom
+    dir: BoM/Generic
+    options:
+      format: HTML
+      group_fields: &id001
+        - part
+        - part lib
+        - value
+        - footprint
+        - footprint lib
+        - voltage
+        - tolerance
+        - current
+        - power
+      count_smd_tht: true
+  - name: generic_bom_csv
+    comment: Generic Bill of Materials in CSV format
+    type: bom
+    dir: BoM/Generic
+    options:
+      format: CSV
+      group_fields: *id001
+      count_smd_tht: true
